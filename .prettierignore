@@ -1,0 +1,30 @@
+# Build outputs
+dist
+dist-ssr
+*.local
+
+# Dependencies
+node_modules
+pnpm-lock.yaml
+
+# Tauri
+src-tauri/target
+
+# Env files
+.env
+.env.*
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+
+# IDE
+*.swp
+*.swo
+*~
+
+# Generated files
+coverage
+.nyc_output
