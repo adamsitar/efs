@@ -15,10 +15,39 @@ export default defineConfig({
     presetWebFonts({
       provider: 'google',
       fonts: {
-        sans: 'IBM Plex Sans:400,500,600,700',
-        mono: 'IBM Plex Mono:400,500,600,700',
+        sans: 'IBM Plex Sans:300,400,500,600,700',
+        mono: 'IBM Plex Mono:300,400,500,600,700',
       },
     }),
+  ],
+
+  safelist: [
+    // Gap classes for layout primitives (vstack, hstack)
+    'gap-1',
+    'gap-2',
+    'gap-3',
+    'gap-4',
+    'gap-6',
+    'gap-8',
+    // Alignment classes for hstack primitive
+    'items-start',
+    'items-center',
+    'items-end',
+    // Text colors
+    'text-primary',
+    'text-secondary',
+    'text-muted',
+    // Focus indicator (shortcut and component classes)
+    'focus-indicator',
+    'outline-2',
+    'outline-dashed',
+    'outline-white',
+    'outline-offset-[-2px]',
+    // Flight strip grid layout
+    'grid-cols-[1fr_40px_120px]',
+    'grid-cols-[1fr_120px]',
+    'grid-cols-[auto_1fr_120px]',
+    'min-w-8',
   ],
 
   theme: {
@@ -67,7 +96,7 @@ export default defineConfig({
           background-color: ${theme.colors.base};
           color: ${theme.colors.primary};
           font-family: 'IBM Plex Sans', system-ui, -apple-system, sans-serif;
-          font-weight: 500;
+          font-weight: 400;
         }
 
         /* Allow percentage-based heights */
@@ -80,9 +109,27 @@ export default defineConfig({
           isolation: isolate;
         }
 
+        .focus-indicator{
+          outline: 2px dashed white;
+          outline-offset: -2px;
+        }
+
+
+        /* Active (directly focused element) - thinner dotted line */
+        .focus-indicator-active {
+          outline: 1.5px dashed white;
+          outline-offset: -1.5px;
+        }
+
+        /* Ancestor (in focus path but not directly focused) - subtle solid line */
+        .focus-indicator-ancestor {
+          outline: 1px solid white; 
+          outline-offset: -1px;
+        }
+
         /* Subtle rounding (adjustable - change to 0 for pure terminal look) */
         * {
-          border-radius: 2px;
+          border-radius: 0px;
         }
       `,
     },
@@ -93,17 +140,12 @@ export default defineConfig({
     'panel-default': 'bg-panel',
     'panel-elevated': 'bg-elevated border border-border-default',
 
-    // Text variants
-    'text-primary': 'text-primary',
-    'text-secondary': 'text-secondary',
-    'text-muted': 'text-muted',
-
     // Border variants
     'border-default': 'border-border-default',
     'border-subtle': 'border-border-subtle',
     'border-strong': 'border-border-strong',
 
     // Focus state
-    'focus-indicator': 'outline-2 outline-dashed outline-white outline-offset-[-2px]',
+    // 'focus-indicator': 'outline-2 outline-dashed outline-white outline-offset-[-2px]',
   },
 });

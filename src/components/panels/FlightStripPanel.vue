@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue';
 import Panel from '@/components/Panel.vue';
+import Group from '@/components/Group.vue';
 import FlightStrip from '@/components/FlightStrip.vue';
-import { useFocusStore } from '@/stores/focus';
-// @ts-expect-error - lowercase component
-import col from '@/components/primitives/col.vue';
+import { useLayoutStore } from '@/stores/layout';
+import type { FocusableType } from '@/composables/useFocusable';
 
 interface Props {
   title: string;
@@ -13,45 +13,110 @@ interface Props {
 
 const props = defineProps<Props>();
 
-// Check if this panel is focused
-const focusStore = useFocusStore();
-const isFocused = computed(() => focusStore.isFocused(props.panelId));
+const layoutStore = useLayoutStore();
 
 interface FlightStripData {
   id: string;
   callsign: string;
-  currentAltitude: string;
-  clearedAltitude: string;
-  speed: string;
-  runway: string;
+  flightNumber: string;
+  aircraftType: string;
+  registration: string;
+  adep: string;
+  ades: string;
+  equipmentCodes?: string[];
+  count?: number;
 }
 
 const flightStrips = ref<FlightStripData[]>([
-  { id: '1', callsign: 'AAL123', currentAltitude: 'FL350', clearedAltitude: 'FL370', speed: 'M.82', runway: '24L' },
-  { id: '2', callsign: 'DAL456', currentAltitude: 'FL280', clearedAltitude: 'FL310', speed: 'M.78', runway: '24R' },
-  { id: '3', callsign: 'UAL789', currentAltitude: 'FL330', clearedAltitude: 'FL350', speed: 'M.80', runway: '24L' },
-  { id: '4', callsign: 'SWA321', currentAltitude: 'FL300', clearedAltitude: 'FL320', speed: 'M.76', runway: '24R' },
-  { id: '5', callsign: 'JBU567', currentAltitude: 'FL340', clearedAltitude: 'FL360', speed: 'M.79', runway: '24L' },
+  {
+    id: '1',
+    callsign: 'AAL123',
+    flightNumber: 'A1234',
+    aircraftType: 'B738/M',
+    registration: 'N12345',
+    adep: 'KJFK',
+    ades: 'KLAX',
+    equipmentCodes: ['W', '8', 'P', '1'],
+  },
+  {
+    id: '2',
+    callsign: 'DAL456',
+    flightNumber: 'D5678',
+    aircraftType: 'A320/M',
+    registration: 'N67890',
+    adep: 'KATL',
+    ades: 'KORD',
+    equipmentCodes: ['W', '8', 'P', '2'],
+  },
+  {
+    id: '3',
+    callsign: 'UAL789',
+    flightNumber: 'U9012',
+    aircraftType: 'B77W/H',
+    registration: 'N24680',
+    adep: 'KSFO',
+    ades: 'KEWR',
+    equipmentCodes: ['W', '8', 'P', '1'],
+  },
+  {
+    id: '4',
+    callsign: 'SWA321',
+    flightNumber: 'S3456',
+    aircraftType: 'B737/M',
+    registration: 'N13579',
+    adep: 'KLAS',
+    ades: 'KPHX',
+    equipmentCodes: ['W', '8', 'P', '3'],
+  },
+  {
+    id: '5',
+    callsign: 'JBU567',
+    flightNumber: 'J7890',
+    aircraftType: 'A321/M',
+    registration: 'N86420',
+    adep: 'KJFK',
+    ades: 'KMCO',
+    equipmentCodes: ['W', '8', 'P', '1'],
+  },
 ]);
 
 function handleClose() {
-  console.log('Close panel:', props.title);
-  // TODO: Dispatch action to layout store to close this panel
+  layoutStore.closePanel(props.panelId);
 }
+
+// Compute list of strips for Group
+const stripChildren = computed(() => {
+  return flightStrips.value.map((strip) => ({
+    id: `${props.panelId}-strip-${strip.id}`,
+    type: 'strip' as FocusableType
+  }))
+})
 </script>
 
 <template>
-  <Panel :title="title" :focused="isFocused" @close="handleClose">
-    <col gap="2">
-      <FlightStrip
-        v-for="strip in flightStrips"
-        :key="strip.id"
-        :callsign="strip.callsign"
-        :current-altitude="strip.currentAltitude"
-        :cleared-altitude="strip.clearedAltitude"
-        :speed="strip.speed"
-        :runway="strip.runway"
-      />
-    </col>
+  <Panel :title="title" :panel-id="panelId" :has-group="true" @close="handleClose">
+    <Group
+      :group-id="`${panelId}-group`"
+      direction="vertical"
+      :children="stripChildren"
+      :enable-arrow="true"
+      :enable-tab="true"
+    >
+      <vstack gap="1">
+        <FlightStrip
+          v-for="strip in flightStrips"
+          :key="strip.id"
+          :strip-id="`${panelId}-strip-${strip.id}`"
+          :callsign="strip.callsign"
+          :flight-number="strip.flightNumber"
+          :aircraft-type="strip.aircraftType"
+          :registration="strip.registration"
+          :adep="strip.adep"
+          :ades="strip.ades"
+          :equipment-codes="strip.equipmentCodes"
+          :count="strip.count"
+        />
+      </vstack>
+    </Group>
   </Panel>
 </template>

@@ -1,23 +1,34 @@
 import { defineStore } from 'pinia';
 import { ref } from 'vue';
 
-export const useFocusStore = defineStore('focus', () => {
-  // Currently focused element ID
-  const focusedId = ref<string | null>(null);
+export interface FocusInfo {
+  id: string;
+  type: 'panel' | 'strip' | 'field' | 'menu-item' | 'group';
+}
 
-  // Focus an element by ID
-  function focus(id: string | null) {
-    focusedId.value = id;
+export const useFocusStore = defineStore('focus', () => {
+  // Currently focused element
+  const focused = ref<FocusInfo | null>(null);
+
+  // Focus an element
+  function focus(info: FocusInfo | null) {
+    focused.value = info;
   }
 
   // Check if a specific ID is focused
   function isFocused(id: string) {
-    return focusedId.value === id;
+    return focused.value?.id === id;
+  }
+
+  // Get the type of the focused element
+  function getFocusedType(): string | null {
+    return focused.value?.type ?? null;
   }
 
   return {
-    focusedId,
+    focused,
     focus,
-    isFocused
+    isFocused,
+    getFocusedType
   };
 });

@@ -1,0 +1,13 @@
+/* Focus hierarchy visual indicators */
+
+/* Active (directly focused element) - thinner dotted line */
+.focus-indicator-active {
+  outline: 1.5px dashed white;
+  outline-offset: -1.5px;
+}
+
+/* Ancestor (in focus path but not directly focused) - subtle solid line */
+.focus-indicator-ancestor {
+  outline: 1px solid rgba(255, 255, 255, 0.25);
+  outline-offset: -1px;
+}

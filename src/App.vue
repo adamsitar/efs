@@ -1,15 +1,11 @@
 <script setup lang="ts">
-import Group from '@/components/Group.vue';
-import Stack from '@/components/Stack.vue';
-import { useLayoutStore } from '@/stores/layout';
+import { useLayoutStore } from '@/stores/layout'
 
-const layoutStore = useLayoutStore();
+const layoutStore = useLayoutStore()
 </script>
 
 <template>
   <div class="h-screen w-screen bg-base">
-    <Group>
-      <Stack :node="layoutStore.root" />
-    </Group>
+    <splitter :node="layoutStore.root" :is-root="true" />
   </div>
 </template>
