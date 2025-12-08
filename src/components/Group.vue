@@ -1,194 +1,199 @@
 <script setup lang="ts">
-import { computed, onMounted } from 'vue'
-import { useFocusable, type FocusableType } from '@/composables/useFocusable'
-import { useFocusStore } from '@/stores/focus'
-import { useKeybindStore } from '@/stores/keybinds'
-import { useLayoutStore } from '@/stores/layout'
+import { ref, onMounted, onUnmounted } from 'vue'
+import { useFocusable } from '@/composables/useFocusable'
+import { useKeybindMetadataStore } from '@/stores/keybindMetadata'
 
 interface Props {
   groupId: string
   direction?: 'horizontal' | 'vertical'
-  children: Array<{ id: string, type: FocusableType }>
-  enableTab?: boolean
-  enableCtrlArrow?: boolean
-  enableArrow?: boolean
-  enableNum?: boolean  // Ctrl+1-9 for direct child selection
+  isRoot?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
   direction: 'vertical',
-  enableTab: false,
-  enableCtrlArrow: false,
-  enableArrow: false,
-  enableNum: false
+  isRoot: false
 })
 
-const focusStore = useFocusStore()
-const keybindStore = useKeybindStore()
-const layoutStore = useLayoutStore()
+const groupEl = ref<HTMLElement>()
+const metadataStore = useKeybindMetadataStore()
 
-// Find next/previous child to focus
-function findChildByOffset(offset: number): { id: string, type: FocusableType } | null {
-  const focused = focusStore.focused
-  if (!focused) return null
+// Track last focused child for auto-transfer
+const { handleFocus } = useFocusable(groupEl, {
+  containerEl: groupEl
+})
 
-  const currentIndex = props.children.findIndex(c => c.id === focused.id)
-  if (currentIndex === -1) return null
+// Register keybind metadata based on direction and isRoot
+onMounted(() => {
+  const metadata: Record<string, any> = {}
 
-  const targetIndex = currentIndex + offset
-  if (targetIndex < 0 || targetIndex >= props.children.length) return null
-
-  return props.children[targetIndex]
-}
-
-function focusNextChild() {
-  const next = findChildByOffset(1)
-  if (next) {
-    focusStore.focus({ id: next.id, type: next.type })
-  }
-}
-
-function focusPreviousChild() {
-  const prev = findChildByOffset(-1)
-  if (prev) {
-    focusStore.focus({ id: prev.id, type: prev.type })
-  }
-}
-
-function focusChildByIndex(index: number) {
-  if (index >= 0 && index < props.children.length) {
-    const child = props.children[index]
-    focusStore.focus({ id: child.id, type: child.type })
-  }
-}
-
-// Keybinds based on props
-const keybinds = computed((): Record<string, Function> => {
-  const bindings: Record<string, Function> = {}
-
-  // Bare arrow navigation (for strip groups)
-  if (props.enableArrow) {
-    if (props.direction === 'vertical') {
-      bindings['ArrowDown'] = focusNextChild
-      bindings['ArrowUp'] = focusPreviousChild
-    } else {
-      bindings['ArrowRight'] = focusNextChild
-      bindings['ArrowLeft'] = focusPreviousChild
+  // Orientation-based Ctrl+Arrow
+  if (props.direction === 'vertical') {
+    metadata['ctrl+ArrowDown'] = {
+      key: 'ctrl+ArrowDown',
+      symbol: 'Ctrl+↓',
+      name: 'Next item',
+      description: 'Focus next item in vertical group',
+      group: 'Navigation'
     }
-  }
-
-  // Ctrl+Arrow navigation (orientation-based, same pattern as enableArrow)
-  if (props.enableCtrlArrow) {
-    if (props.direction === 'vertical') {
-      bindings['ctrl+ArrowDown'] = focusNextChild
-      bindings['ctrl+ArrowUp'] = focusPreviousChild
-    } else {  // horizontal
-      bindings['ctrl+ArrowRight'] = focusNextChild
-      bindings['ctrl+ArrowLeft'] = focusPreviousChild
+    metadata['ctrl+ArrowUp'] = {
+      key: 'ctrl+ArrowUp',
+      symbol: 'Ctrl+↑',
+      name: 'Previous item',
+      description: 'Focus previous item in vertical group',
+      group: 'Navigation'
+    }
+  } else {
+    metadata['ctrl+ArrowRight'] = {
+      key: 'ctrl+ArrowRight',
+      symbol: 'Ctrl+→',
+      name: 'Next item',
+      description: 'Focus next item in horizontal group',
+      group: 'Navigation'
+    }
+    metadata['ctrl+ArrowLeft'] = {
+      key: 'ctrl+ArrowLeft',
+      symbol: 'Ctrl+←',
+      name: 'Previous item',
+      description: 'Focus previous item in horizontal group',
+      group: 'Navigation'
     }
   }
 
   // Tab navigation
-  if (props.enableTab) {
-    bindings['Tab'] = focusNextChild
-    bindings['shift+Tab'] = focusPreviousChild
+  metadata['Tab'] = {
+    key: 'Tab',
+    symbol: 'Tab',
+    name: 'Next',
+    description: 'Focus next item',
+    group: 'Navigation'
+  }
+  metadata['shift+Tab'] = {
+    key: 'shift+Tab',
+    symbol: 'Shift+Tab',
+    name: 'Previous',
+    description: 'Focus previous item',
+    group: 'Navigation'
   }
 
-  // Direct jump (Ctrl+1-9)
-  if (props.enableNum) {
+  // Ctrl+Num (only for root)
+  if (props.isRoot) {
     for (let i = 1; i <= 9; i++) {
-      bindings[`ctrl+${i}`] = () => focusChildByIndex(i - 1)
+      metadata[`ctrl+${i}`] = {
+        key: `ctrl+${i}`,
+        symbol: `Ctrl+${i}`,
+        name: `Jump to panel ${i}`,
+        description: `Directly focus panel ${i}`,
+        group: 'Navigation'
+      }
     }
   }
 
-  return bindings
+  metadataStore.register(props.groupId, metadata)
 })
 
-// Use focusable with auto-transfer
-const { handleClick } = useFocusable(
-  props.groupId,
-  'group',
-  {
-    children: computed(() => props.children),
-    keybinds: keybinds.value
-  }
-)
+onUnmounted(() => {
+  metadataStore.unregister(props.groupId)
+})
 
-// Get focus hierarchy from leaf to root using layout store
-function getFocusHierarchy(focused: any): Array<{ id: string, type: string }> {
-  if (!focused) return []
-
-  const hierarchy = [focused]
-
-  // If focused element is a strip, find its parent panel first
-  let currentId = focused.id
-  if (focused.type === 'strip') {
-    // Strip IDs are like 'panel-X-strip-Y', extract panel ID
-    const panelIdMatch = focused.id.match(/^(.+?)-strip-/)
-    if (panelIdMatch) {
-      const panelId = panelIdMatch[1]
-
-      // Insert Group between strip and panel in hierarchy
-      hierarchy.push({ id: `${panelId}-group`, type: 'group' })
-      hierarchy.push({ id: panelId, type: 'panel' })
-      currentId = panelId
-    }
-  }
-
-  // Walk up layout tree to build complete hierarchy (includes Splitters)
-  let currentNode = layoutStore.findNode(currentId)
-
-  while (currentNode) {
-    const parent = layoutStore.findParent(currentNode.id)
-    if (!parent) break
-
-    // Add the auto-generated Group for this Splitter
-    if (parent.type === 'splitter') {
-      hierarchy.push({ id: `${parent.id}-group`, type: 'group' })
-    }
-
-    hierarchy.push({ id: parent.id, type: parent.type })
-    currentNode = parent
-  }
-
-  return hierarchy
+// Get all focusable children (elements with tabindex)
+function getFocusableChildren(): HTMLElement[] {
+  if (!groupEl.value) return []
+  return Array.from(groupEl.value.querySelectorAll('[tabindex]:not([tabindex="-1"])'))
 }
 
-// Keyboard event handler with pure bubbling architecture
+function focusNextChild() {
+  const children = getFocusableChildren()
+  if (children.length === 0) return
+
+  const currentIndex = children.indexOf(document.activeElement as HTMLElement)
+  const nextIndex = (currentIndex + 1) % children.length
+  children[nextIndex].focus()
+}
+
+function focusPreviousChild() {
+  const children = getFocusableChildren()
+  if (children.length === 0) return
+
+  const currentIndex = children.indexOf(document.activeElement as HTMLElement)
+  const prevIndex = (currentIndex - 1 + children.length) % children.length
+  children[prevIndex].focus()
+}
+
+function focusChildByIndex(index: number) {
+  const children = getFocusableChildren()
+  if (index >= 0 && index < children.length) {
+    children[index].focus()
+  }
+}
+
+// Keyboard handler using native DOM bubbling
 function handleKeyDown(event: KeyboardEvent) {
-  const focused = focusStore.focused
-  if (!focused) return
-
-  // Build focus hierarchy and try keybind bubbling
-  const hierarchy = getFocusHierarchy(focused)
-
-  for (const level of hierarchy) {
-    if (keybindStore.tryExecute(level.id, event)) {
-      event.preventDefault()
-      event.stopPropagation()
-      return
+  // Orientation-based Ctrl+Arrow navigation
+  if (event.ctrlKey) {
+    if (props.direction === 'vertical') {
+      if (event.key === 'ArrowDown') {
+        focusNextChild()
+        event.preventDefault()
+        event.stopPropagation()
+        return
+      }
+      if (event.key === 'ArrowUp') {
+        focusPreviousChild()
+        event.preventDefault()
+        event.stopPropagation()
+        return
+      }
+    } else { // horizontal
+      if (event.key === 'ArrowRight') {
+        focusNextChild()
+        event.preventDefault()
+        event.stopPropagation()
+        return
+      }
+      if (event.key === 'ArrowLeft') {
+        focusPreviousChild()
+        event.preventDefault()
+        event.stopPropagation()
+        return
+      }
     }
   }
-}
 
-// Set initial focus on mount
-onMounted(() => {
-  // Only auto-focus if this is the root group (or if no element is focused)
-  if (!focusStore.focused && props.children.length > 0) {
-    const firstChild = props.children[0]
-    focusStore.focus({ id: firstChild.id, type: firstChild.type })
+  // Ctrl+Num (only for root group)
+  if (props.isRoot && event.ctrlKey && /^[1-9]$/.test(event.key)) {
+    const index = parseInt(event.key) - 1
+    focusChildByIndex(index)
+    event.preventDefault()
+    event.stopPropagation()
+    return
   }
-})
+
+  // Tab navigation (sequential)
+  if (event.key === 'Tab') {
+    if (event.shiftKey) {
+      focusPreviousChild()
+    } else {
+      focusNextChild()
+    }
+    event.preventDefault()
+    event.stopPropagation()
+    return
+  }
+
+  // If key not handled, let it bubble to parent naturally
+}
 </script>
 
 <template>
-  <div class="h-full w-full" tabindex="0" @keydown="handleKeyDown" @click="handleClick" @focusout.capture="(e) => {
-    // Keep focus trapped
-    const target = e.currentTarget as HTMLElement | null;
-    if (target && !target.contains(e.relatedTarget as Node)) {
-      target.focus();
-    }
-  }">
+  <div
+    ref="groupEl"
+    :data-focusable-id="groupId"
+    data-focusable-type="group"
+    class="group h-full w-full"
+    tabindex="-1"
+    @focus.self="handleFocus"
+    @keydown="handleKeyDown"
+  >
     <slot />
   </div>
 </template>

@@ -1,30 +1,29 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue';
-import Panel from '@/components/Panel.vue';
-import Group from '@/components/Group.vue';
-import FlightStrip from '@/components/FlightStrip.vue';
-import { useLayoutStore } from '@/stores/layout';
-import type { FocusableType } from '@/composables/useFocusable';
+import { ref, computed } from 'vue'
+import Panel from '@/components/Panel.vue'
+import Group from '@/components/Group.vue'
+import FlightStrip from '@/components/FlightStrip.vue'
+import { useLayoutStore } from '@/stores/layout'
 
 interface Props {
-  title: string;
-  panelId: string;
+  title: string
+  panelId: string
 }
 
-const props = defineProps<Props>();
+const props = defineProps<Props>()
 
-const layoutStore = useLayoutStore();
+const layoutStore = useLayoutStore()
 
 interface FlightStripData {
-  id: string;
-  callsign: string;
-  flightNumber: string;
-  aircraftType: string;
-  registration: string;
-  adep: string;
-  ades: string;
-  equipmentCodes?: string[];
-  count?: number;
+  id: string
+  callsign: string
+  flightNumber: string
+  aircraftType: string
+  registration: string
+  adep: string
+  ades: string
+  equipmentCodes?: string[]
+  count?: number
 }
 
 const flightStrips = ref<FlightStripData[]>([
@@ -36,7 +35,7 @@ const flightStrips = ref<FlightStripData[]>([
     registration: 'N12345',
     adep: 'KJFK',
     ades: 'KLAX',
-    equipmentCodes: ['W', '8', 'P', '1'],
+    equipmentCodes: ['W', '8', 'P', '1']
   },
   {
     id: '2',
@@ -46,7 +45,7 @@ const flightStrips = ref<FlightStripData[]>([
     registration: 'N67890',
     adep: 'KATL',
     ades: 'KORD',
-    equipmentCodes: ['W', '8', 'P', '2'],
+    equipmentCodes: ['W', '8', 'P', '2']
   },
   {
     id: '3',
@@ -56,7 +55,7 @@ const flightStrips = ref<FlightStripData[]>([
     registration: 'N24680',
     adep: 'KSFO',
     ades: 'KEWR',
-    equipmentCodes: ['W', '8', 'P', '1'],
+    equipmentCodes: ['W', '8', 'P', '1']
   },
   {
     id: '4',
@@ -66,7 +65,7 @@ const flightStrips = ref<FlightStripData[]>([
     registration: 'N13579',
     adep: 'KLAS',
     ades: 'KPHX',
-    equipmentCodes: ['W', '8', 'P', '3'],
+    equipmentCodes: ['W', '8', 'P', '3']
   },
   {
     id: '5',
@@ -76,31 +75,22 @@ const flightStrips = ref<FlightStripData[]>([
     registration: 'N86420',
     adep: 'KJFK',
     ades: 'KMCO',
-    equipmentCodes: ['W', '8', 'P', '1'],
-  },
-]);
+    equipmentCodes: ['W', '8', 'P', '1']
+  }
+])
 
 function handleClose() {
-  layoutStore.closePanel(props.panelId);
+  layoutStore.closePanel(props.panelId)
 }
 
-// Compute list of strips for Group
-const stripChildren = computed(() => {
-  return flightStrips.value.map((strip) => ({
-    id: `${props.panelId}-strip-${strip.id}`,
-    type: 'strip' as FocusableType
-  }))
-})
+const groupId = computed(() => `${props.panelId}-group`)
 </script>
 
 <template>
   <Panel :title="title" :panel-id="panelId" :has-group="true" @close="handleClose">
     <Group
-      :group-id="`${panelId}-group`"
+      :group-id="groupId"
       direction="vertical"
-      :children="stripChildren"
-      :enable-arrow="true"
-      :enable-tab="true"
     >
       <vstack gap="1">
         <FlightStrip
