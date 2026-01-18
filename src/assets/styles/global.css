@@ -1,13 +1,27 @@
-/* Focus hierarchy visual indicators */
+/* Focus hierarchy visual indicators using native browser focus */
 
 /* Active (directly focused element) - thinner dotted line */
-.focus-indicator-active {
+[data-focusable-type]:focus {
   outline: 1.5px dashed white;
   outline-offset: -1.5px;
 }
 
 /* Ancestor (in focus path but not directly focused) - subtle solid line */
-.focus-indicator-ancestor {
+[data-focusable-type]:focus-within {
   outline: 1px solid rgba(255, 255, 255, 0.25);
   outline-offset: -1px;
+}
+
+/* Ensure focused element gets the dashed outline, not the solid one from :focus-within */
+[data-focusable-type]:focus-within:focus {
+  outline: 1.5px dashed white;
+  outline-offset: -1.5px;
+}
+
+/* Prevent scrollbars on RTL/LTR switching */
+html, body {
+  overflow: hidden;
+  width: 100%;
+  height: 100%;
+  position: fixed;
 }

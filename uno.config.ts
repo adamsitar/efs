@@ -53,48 +53,48 @@ export default defineConfig({
   theme: {
     colors: {
       // Backgrounds
-      base: '#000000', // Base background (pure black for OLED)
-      panel: '#0a0a0a', // Panel background
-      'panel-hover': '#141414', // Panel hover state
-      elevated: '#1a1a1a', // Elevated elements (modals, popovers)
+      base: 'var(--color-base)',
+      panel: 'var(--color-panel)',
+      'panel-hover': 'var(--color-panel-hover)',
+      elevated: 'var(--color-elevated)',
 
       // Borders
-      'border-default': '#404040', // Default border color (visible against black)
-      'border-subtle': '#262626', // Subtle borders
-      'border-strong': '#525252', // Strong borders
+      'border-default': 'var(--color-border-default)',
+      'border-subtle': 'var(--color-border-subtle)',
+      'border-strong': 'var(--color-border-strong)',
 
       // Text
-      primary: '#d4d4d4', // Primary text
-      secondary: '#a3a3a3', // Secondary text
-      muted: '#737373', // Muted text
-      inverse: '#000000', // Inverse text (for light backgrounds)
+      primary: 'var(--color-primary)',
+      secondary: 'var(--color-secondary)',
+      muted: 'var(--color-muted)',
+      inverse: 'var(--color-inverse)',
 
       // Semantic colors
-      accent: '#3b82f6', // Primary accent (blue)
-      success: '#22c55e', // Success state (green)
-      warning: '#f59e0b', // Warning state (orange)
-      danger: '#ef4444', // Danger state (red)
+      accent: 'var(--color-accent)',
+      success: 'var(--color-success)',
+      warning: 'var(--color-warning)',
+      danger: 'var(--color-danger)',
 
       // Interactive states
-      hover: '#1e293b', // Hover state
-      active: '#334155', // Active/pressed state
-      // focus: '#3b82f6', // Focus outline
+      hover: 'var(--color-hover)',
+      active: 'var(--color-active)',
     },
 
     fontFamily: {
       // Dual font strategy: Mono for data/editable, Sans for UI
+      // Arabic font fallback included for RTL support
       mono: ['IBM Plex Mono', 'ui-monospace', 'Consolas', 'monospace'],
-      sans: ['IBM Plex Sans', 'system-ui', '-apple-system', 'sans-serif'],
+      sans: ['IBM Plex Sans', 'system-ui', '-apple-system', 'Arial', 'Tahoma', 'sans-serif'],
     },
   },
 
   preflights: [
     {
-      getCSS: ({ theme }) => `
+      getCSS: () => `
         /* Terminal aesthetic baseline */
         body {
-          background-color: ${theme.colors.base};
-          color: ${theme.colors.primary};
+          background-color: var(--color-base);
+          color: var(--color-primary);
           font-family: 'IBM Plex Sans', system-ui, -apple-system, sans-serif;
           font-weight: 400;
         }
@@ -123,7 +123,7 @@ export default defineConfig({
 
         /* Ancestor (in focus path but not directly focused) - subtle solid line */
         .focus-indicator-ancestor {
-          outline: 1px solid white; 
+          outline: 1px solid white;
           outline-offset: -1px;
         }
 

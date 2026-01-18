@@ -1,40 +1,22 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-import { useLayoutStore } from '@/stores/layout'
-import { useFocusStore } from '@/stores/focus'
-import { useKeybindMetadataStore } from '@/stores/keybindMetadata'
-import WhichKeyMenu from '@/components/WhichKeyMenu.vue'
+import { useLayoutStore } from '@/stores/layout';
+import { useModalsStore } from '@/stores/modals';
+import { useWebSocket } from '@/composables/useWebSocket';
+import StatusBar from '@/components/StatusBar.vue';
+import FloatingModal from '@/components/FloatingModal.vue';
 
-const layoutStore = useLayoutStore()
-const focusStore = useFocusStore()
-const metadataStore = useKeybindMetadataStore()
-
-const showWhichKey = ref(false)
-
-// Compute available keybinds for current focus path
-const whichKeyBinds = computed(() => {
-  return metadataStore.getAllMetadataForPath(focusStore.focusPath)
-})
-
-function handleGlobalKeys(event: KeyboardEvent) {
-  // Toggle which-key menu with ?
-  if (event.key === '?' && !event.ctrlKey && !event.altKey && !event.metaKey) {
-    showWhichKey.value = !showWhichKey.value
-    event.preventDefault()
-    return
-  }
-}
+const layoutStore = useLayoutStore();
+const modalsStore = useModalsStore();
+useWebSocket();
 </script>
 
 <template>
-  <div class="h-screen w-screen bg-base" @keydown="handleGlobalKeys">
-    <splitter :node="layoutStore.root" :is-root="true" />
+  <div class="h-screen w-screen bg-base flex flex-col">
+    <div class="flex-1 p-2 overflow-hidden">
+      <splitter :node="layoutStore.root" />
+    </div>
+    <StatusBar />
 
-    <!-- Which-Key Menu -->
-    <WhichKeyMenu
-      v-if="showWhichKey"
-      :keybinds="whichKeyBinds"
-      @close="showWhichKey = false"
-    />
+    <FloatingModal v-for="modal in modalsStore.modals" :key="modal.key" :modal-key="modal.key" />
   </div>
 </template>
