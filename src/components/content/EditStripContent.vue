@@ -3,16 +3,8 @@ import { ref } from 'vue';
 import { useServerConnection } from '@/composables/useServerConnection';
 import { useModalsStore } from '@/stores/modals';
 import type { Strip, StripUpdate, ClientMessage, StripArray } from '@/types/ws-messages';
-import {
-  SelectRoot,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-  SelectItemText,
-  SelectPortal,
-  SelectViewport,
-} from 'reka-ui';
+import Select from '@/components/primitives/input/select/Select.vue';
+import SelectItem from '@/components/primitives/input/select/SelectItem.vue';
 
 interface Props {
   strip: Strip;
@@ -106,46 +98,12 @@ const handleSubmit = (event: Event) => {
     <form @submit="handleSubmit" class="flex-1 overflow-y-auto space-y-3 pr-2">
       <div>
         <label class="text-sm text-primary block mb-1">Strip Array</label>
-        <SelectRoot v-model="formData.strip_array">
-          <SelectTrigger
-            class="w-full px-2 py-1 bg-base border border-border-default text-primary text-sm outline-none focus:border-accent font-mono flex items-center justify-between"
-          >
-            <SelectValue placeholder="Select strip array" />
-          </SelectTrigger>
-          <SelectPortal>
-            <SelectContent
-              class="bg-panel border border-border-default shadow-lg overflow-hidden"
-              :side-offset="5"
-            >
-              <SelectViewport>
-                <SelectItem
-                  value="Planned"
-                  class="px-2 py-1 text-sm text-primary hover:bg-elevated cursor-pointer outline-none font-mono"
-                >
-                  <SelectItemText>Planned</SelectItemText>
-                </SelectItem>
-                <SelectItem
-                  value="Departed"
-                  class="px-2 py-1 text-sm text-primary hover:bg-elevated cursor-pointer outline-none font-mono"
-                >
-                  <SelectItemText>Departed</SelectItemText>
-                </SelectItem>
-                <SelectItem
-                  value="Arrived"
-                  class="px-2 py-1 text-sm text-primary hover:bg-elevated cursor-pointer outline-none font-mono"
-                >
-                  <SelectItemText>Arrived</SelectItemText>
-                </SelectItem>
-                <SelectItem
-                  value="Cancelled"
-                  class="px-2 py-1 text-sm text-primary hover:bg-elevated cursor-pointer outline-none font-mono"
-                >
-                  <SelectItemText>Cancelled</SelectItemText>
-                </SelectItem>
-              </SelectViewport>
-            </SelectContent>
-          </SelectPortal>
-        </SelectRoot>
+        <Select v-model="formData.strip_array" placeholder="Select strip array">
+          <SelectItem value="Planned">Planned</SelectItem>
+          <SelectItem value="Departed">Departed</SelectItem>
+          <SelectItem value="Arrived">Arrived</SelectItem>
+          <SelectItem value="Cancelled">Cancelled</SelectItem>
+        </Select>
       </div>
 
       <div>
@@ -171,46 +129,12 @@ const handleSubmit = (event: Event) => {
 
         <div>
           <label class="text-sm text-primary block mb-1">Wake Turbulence</label>
-          <SelectRoot v-model="formData.wake_turbulence">
-            <SelectTrigger
-              class="w-full px-2 py-1 bg-base border border-border-default text-primary text-sm outline-none focus:border-accent font-mono flex items-center justify-between"
-            >
-              <SelectValue placeholder="Select wake turbulence" />
-            </SelectTrigger>
-            <SelectPortal>
-              <SelectContent
-                class="bg-panel border border-border-default shadow-lg overflow-hidden"
-                :side-offset="5"
-              >
-                <SelectViewport>
-                  <SelectItem
-                    value="L"
-                    class="px-2 py-1 text-sm text-primary hover:bg-elevated cursor-pointer outline-none font-mono"
-                  >
-                    <SelectItemText>L (Light)</SelectItemText>
-                  </SelectItem>
-                  <SelectItem
-                    value="M"
-                    class="px-2 py-1 text-sm text-primary hover:bg-elevated cursor-pointer outline-none font-mono"
-                  >
-                    <SelectItemText>M (Medium)</SelectItemText>
-                  </SelectItem>
-                  <SelectItem
-                    value="H"
-                    class="px-2 py-1 text-sm text-primary hover:bg-elevated cursor-pointer outline-none font-mono"
-                  >
-                    <SelectItemText>H (Heavy)</SelectItemText>
-                  </SelectItem>
-                  <SelectItem
-                    value="J"
-                    class="px-2 py-1 text-sm text-primary hover:bg-elevated cursor-pointer outline-none font-mono"
-                  >
-                    <SelectItemText>J (Super)</SelectItemText>
-                  </SelectItem>
-                </SelectViewport>
-              </SelectContent>
-            </SelectPortal>
-          </SelectRoot>
+          <Select v-model="formData.wake_turbulence" placeholder="Select wake turbulence">
+            <SelectItem value="L">L (Light)</SelectItem>
+            <SelectItem value="M">M (Medium)</SelectItem>
+            <SelectItem value="H">H (Heavy)</SelectItem>
+            <SelectItem value="J">J (Super)</SelectItem>
+          </Select>
         </div>
       </div>
 
@@ -274,34 +198,10 @@ const handleSubmit = (event: Event) => {
 
       <div>
         <label class="text-sm text-primary block mb-1">Flight Rules</label>
-        <SelectRoot v-model="formData.flight_rules">
-          <SelectTrigger
-            class="w-full px-2 py-1 bg-base border border-border-default text-primary text-sm outline-none focus:border-accent font-mono flex items-center justify-between"
-          >
-            <SelectValue placeholder="Select flight rules" />
-          </SelectTrigger>
-          <SelectPortal>
-            <SelectContent
-              class="bg-panel border border-border-default shadow-lg overflow-hidden"
-              :side-offset="5"
-            >
-              <SelectViewport>
-                <SelectItem
-                  value="IFR"
-                  class="px-2 py-1 text-sm text-primary hover:bg-elevated cursor-pointer outline-none font-mono"
-                >
-                  <SelectItemText>IFR</SelectItemText>
-                </SelectItem>
-                <SelectItem
-                  value="VFR"
-                  class="px-2 py-1 text-sm text-primary hover:bg-elevated cursor-pointer outline-none font-mono"
-                >
-                  <SelectItemText>VFR</SelectItemText>
-                </SelectItem>
-              </SelectViewport>
-            </SelectContent>
-          </SelectPortal>
-        </SelectRoot>
+        <Select v-model="formData.flight_rules" placeholder="Select flight rules">
+          <SelectItem value="IFR">IFR</SelectItem>
+          <SelectItem value="VFR">VFR</SelectItem>
+        </Select>
       </div>
 
       <div>

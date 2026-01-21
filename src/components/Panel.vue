@@ -1,17 +1,10 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
-import {
-  DropdownMenuRoot,
-  DropdownMenuTrigger,
-  DropdownMenuPortal,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuSub,
-  DropdownMenuSubTrigger,
-  DropdownMenuSubContent,
-} from 'reka-ui';
+import Dropdown from '@/components/primitives/input/dropdown/Dropdown.vue';
+import DropdownItem from '@/components/primitives/input/dropdown/DropdownItem.vue';
+import DropdownSeparator from '@/components/primitives/input/dropdown/DropdownSeparator.vue';
+import DropdownSub from '@/components/primitives/input/dropdown/DropdownSub.vue';
 import { useLayoutStore } from '@/stores/layout';
 import { getPanelContent } from '@/registries/panelContent';
 
@@ -66,61 +59,36 @@ function handleChangeType(newPanelKey: string) {
       <!-- Panel controls -->
       <div class="flex items-center gap-1">
         <!-- Settings menu -->
-        <DropdownMenuRoot>
-          <DropdownMenuTrigger as-child>
+        <Dropdown>
+          <template #trigger>
             <div
               class="i-ph-dots-three-vertical text-xs cursor-pointer text-primary hover:text-accent transition-colors"
             />
-          </DropdownMenuTrigger>
+          </template>
 
-          <DropdownMenuPortal>
-            <DropdownMenuContent
-              :side-offset="4"
-              class="min-w-40 bg-elevated border border-border-default p-1 text-sm text-primary z-50"
+          <DropdownItem @select="handleSplitHorizontal">
+            {{ t('panels.splitHorizontal') }}
+          </DropdownItem>
+          <DropdownItem @select="handleSplitVertical">
+            {{ t('panels.splitVertical') }}
+          </DropdownItem>
+
+          <DropdownSeparator />
+
+          <DropdownSub>
+            <template #trigger>
+              {{ t('panels.changeType') }}
+            </template>
+            <DropdownItem
+              v-for="panelType in availablePanelTypes"
+              :key="panelType.key"
+              :disabled="!panelType.isAvailable"
+              @select="handleChangeType(panelType.key)"
             >
-              <DropdownMenuItem
-                class="px-2 py-1 cursor-pointer hover:bg-hover outline-none data-[highlighted]:bg-hover"
-                @select="handleSplitHorizontal"
-              >
-                {{ t('panels.splitHorizontal') }}
-              </DropdownMenuItem>
-              <DropdownMenuItem
-                class="px-2 py-1 cursor-pointer hover:bg-hover outline-none data-[highlighted]:bg-hover"
-                @select="handleSplitVertical"
-              >
-                {{ t('panels.splitVertical') }}
-              </DropdownMenuItem>
-
-              <DropdownMenuSeparator class="h-px bg-border-default my-1" />
-
-              <DropdownMenuSub>
-                <DropdownMenuSubTrigger
-                  class="px-2 py-1 cursor-pointer hover:bg-hover outline-none data-[highlighted]:bg-hover flex items-center justify-between"
-                >
-                  {{ t('panels.changeType') }}
-                  <span class="i-ph-caret-right text-xs" />
-                </DropdownMenuSubTrigger>
-
-                <DropdownMenuPortal>
-                  <DropdownMenuSubContent
-                    :side-offset="4"
-                    class="min-w-36 bg-elevated border border-border-default p-1 text-sm text-primary z-50"
-                  >
-                    <DropdownMenuItem
-                      v-for="panelType in availablePanelTypes"
-                      :key="panelType.key"
-                      :disabled="!panelType.isAvailable"
-                      class="px-2 py-1 cursor-pointer hover:bg-hover outline-none data-[highlighted]:bg-hover data-[disabled]:opacity-50 data-[disabled]:cursor-not-allowed"
-                      @select="handleChangeType(panelType.key)"
-                    >
-                      {{ t(panelType.titleKey) }}
-                    </DropdownMenuItem>
-                  </DropdownMenuSubContent>
-                </DropdownMenuPortal>
-              </DropdownMenuSub>
-            </DropdownMenuContent>
-          </DropdownMenuPortal>
-        </DropdownMenuRoot>
+              {{ t(panelType.titleKey) }}
+            </DropdownItem>
+          </DropdownSub>
+        </Dropdown>
 
         <!-- Close button -->
         <div
