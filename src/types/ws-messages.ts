@@ -8,7 +8,9 @@
 /**
  * Messages sent from client to server
  */
-export type ClientMessage = { type: 'UpdateStrip'; strip_id: string; changes: StripUpdate };
+export type ClientMessage =
+  | { type: 'UpdateStrip'; strip_id: string; changes: StripUpdate }
+  | { type: 'MoveStrip'; strip_id: string; from: StripArray; to: StripArray };
 
 /**
  * Top-level message envelope received over WebSocket
