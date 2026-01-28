@@ -1,0 +1,10 @@
+node_modules/
+dist/
+dist-electron/
+.git/
+.gitignore
+*.md
+.vscode/
+.claude/
+electron/
+electron-builder.yml
