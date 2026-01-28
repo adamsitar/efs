@@ -1,0 +1,18 @@
+appId: com.ibross.efs
+productName: iBross EFS
+directories:
+  output: dist-electron
+  buildResources: build
+files:
+  - dist/**/*
+  - electron/**/*
+  - package.json
+  - node_modules/electron-window-state/**/*
+linux:
+  target:
+    - AppImage
+    - deb
+    - tar.gz
+  category: Utility
+  executableName: ibross-efs
+  maintainer: iBross Aerospace

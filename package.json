@@ -3,20 +3,21 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
+  "main": "electron/main.cjs",
   "scripts": {
     "dev": "vite",
+    "dev:electron": "concurrently \"vite\" \"wait-on http://localhost:1420 && NODE_ENV=development electron .\"",
     "build": "vue-tsc --noEmit && vite build",
+    "build:electron": "vite build && electron-builder",
     "preview": "vite preview",
-    "tauri": "tauri",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "lint": "oxlint",
     "lint:fix": "oxlint --fix"
   },
   "dependencies": {
-    "@tauri-apps/api": "^2",
-    "@tauri-apps/plugin-opener": "^2",
     "@vueuse/core": "^14.1.0",
+    "electron-window-state": "^5.0.3",
     "maplibre-gl": "^5.13.0",
     "pinia": "^3.0.4",
     "pinia-plugin-persistedstate": "^4.7.1",
@@ -26,16 +27,19 @@
   },
   "devDependencies": {
     "@iconify-json/ph": "^1.2.2",
-    "@tauri-apps/cli": "^2",
     "@types/node": "^24.10.1",
     "@unocss/reset": "66.5.10-beta.1",
     "@vitejs/plugin-vue": "^5.2.1",
+    "concurrently": "^9.2.1",
+    "electron": "^40.0.0",
+    "electron-builder": "^26.4.0",
     "oxlint": "^1.31.0",
     "prettier": "^3.7.3",
     "typescript": "~5.6.2",
     "unocss": "66.5.10-beta.1",
     "vite": "^6.0.3",
-    "vue-tsc": "^2.1.10"
+    "vue-tsc": "^2.1.10",
+    "wait-on": "^9.0.3"
   },
   "prettier": {
     "semi": true,

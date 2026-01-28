@@ -44,6 +44,7 @@ function handleClose() {
         :key="strip.id"
         :strip-id="`${panelId}-strip-${strip.id}`"
         :strip="strip"
+        :current-array="type"
       />
     </vstack>
   </Panel>
